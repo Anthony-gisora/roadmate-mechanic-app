@@ -29,7 +29,7 @@ const RequestDescription = () => {
     })();
   }, []);
 
-  // Build map HTML dynamically
+  // Build map HTML template to be used so that wi patch data to make it dynamic
   const leafletHTML = location
     ? `
       <!DOCTYPE html>

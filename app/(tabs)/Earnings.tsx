@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   balanceText: {
-    fontSize: 28, // emphasized balance
+    fontSize: 28,
     fontWeight: "bold",
     color: "#075538",
   },
@@ -119,18 +119,18 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   jobTitle: {
-    fontSize: 20, // bigger
+    fontSize: 20,
     fontWeight: "bold",
     color: "#075538",
   },
   jobAmount: {
-    fontSize: 18, // bigger
+    fontSize: 18,
     color: "#075538",
     fontWeight: "600",
     marginTop: 4,
   },
   jobTime: {
-    fontSize: 16, // bigger
+    fontSize: 16,
     color: "#075538",
     marginTop: 6,
   },
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   viewText: {
-    fontSize: 18, // bigger
+    fontSize: 18,
     fontWeight: "bold",
     color: "#CED46A",
   },
