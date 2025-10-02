@@ -1,19 +1,27 @@
-import { Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { MechanicProvider } from "@/context/MechanicContext";
+import { ClerkProvider } from "@clerk/clerk-expo";
+import { Slot } from "expo-router";
+import * as SecureStore from "expo-secure-store";
+import React from "react";
 
-SplashScreen.preventAutoHideAsync();
+const CLERK_PUBLISHABLE_KEY =
+  "pk_test_c3RpcnJlZC1tdWRmaXNoLTM2LmNsZXJrLmFjY291bnRzLmRldiQ";
 
-export default function RootLayout() {
-  useEffect(() => {
-    setTimeout(async () => {
-      // animating some loading (fetch data na fonts)
-      await SplashScreen.hideAsync();
-    }, 2000);
-  }, []);
+// Token persistence for Expo
+const tokenCache = {
+  getToken: (key) => SecureStore.getItemAsync(key),
+  saveToken: (key, value) => SecureStore.setItemAsync(key, value),
+};
+
+export default function App() {
   return (
-    <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-    </Stack>
+    <ClerkProvider
+      publishableKey={CLERK_PUBLISHABLE_KEY}
+      tokenCache={tokenCache}
+    >
+      <MechanicProvider>
+        <Slot />
+      </MechanicProvider>
+    </ClerkProvider>
   );
 }

@@ -1,30 +1,30 @@
 import { useMechanic } from "@/context/MechanicContext";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
-import { useNavigation } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function CompletedRequests() {
+function ActiveRequests() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
 
   const { mechanic } = useMechanic();
 
-  const handleBack = async () => {
-    navigation.navigate("index");
+  const handleBack = () => {
+    navigation.navigate("index" as never);
   };
 
-  // Fetch requests from API
+  // Fetch in-progress requests
   const getRequests = async () => {
     try {
       setLoading(true);
@@ -32,14 +32,13 @@ export default function CompletedRequests() {
         "https://roadmateassist.onrender.com/api/notifications/reqNotification"
       );
 
-      // filter only completed requests
-      const completed = res.data.filter(
+      // filter only inProgress requests
+      const active = res.data.filter(
         (req: any) =>
-          req.status === "completed" &&
+          req.status === "InProgress" &&
           req.servicedBy == mechanic.personalNumber
       );
-
-      setData(completed);
+      setData(active);
     } catch (error: any) {
       console.log("Error fetching requests:", error.message);
     } finally {
@@ -54,19 +53,35 @@ export default function CompletedRequests() {
   const renderItem = ({ item }: { item: any }) => (
     <View style={styles.card}>
       <View style={{ flex: 1, marginRight: 12 }}>
-        <Text style={styles.title}>{item.requestType}</Text>
+        <Text style={styles.title}>{item?.requestType || "Unknown"}</Text>
 
-        {/* Truncate long description */}
+        {/* truncate long descriptions */}
         <Text style={styles.sub} numberOfLines={1} ellipsizeMode="tail">
-          {item.details}
+          {item?.details || "No details"}
         </Text>
 
         <Text style={styles.time}>
-          Completed · {new Date(item.updatedAt).toLocaleString()}
+          In Progress · {new Date(item.updatedAt).toLocaleString()}
         </Text>
       </View>
 
-      <TouchableOpacity style={styles.btn}>
+      {/* Navigate to RequestDescription */}
+      <TouchableOpacity
+        style={styles.btn}
+        onPress={() =>
+          navigation.navigate(
+            "RequestDescription" as never,
+            {
+              id: item._id,
+              driverId: item?.driverId,
+              requestType: item?.requestType,
+              details: item?.details,
+              latitude: item?.location[0] || 0,
+              longitude: item?.location[1] || 0,
+            } as never
+          )
+        }
+      >
         <Text style={styles.btnText}>View</Text>
       </TouchableOpacity>
     </View>
@@ -79,20 +94,20 @@ export default function CompletedRequests() {
         <TouchableOpacity onPress={handleBack}>
           <Ionicons name="arrow-back" size={30} color="#CED46A" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Completed Request</Text>
+        <Text style={styles.headerTitle}>Active Requests</Text>
         <TouchableOpacity
           onPress={() => navigation.navigate("NotificationRequests" as never)}
         >
-          <Ionicons name="notifications-outline" size={34} color="#CED46A" />
+          <Ionicons name="briefcase-outline" size={30} color="#CED46A" />
         </TouchableOpacity>
       </View>
 
       {/* Banner */}
       <View style={styles.banner}>
-        <Text style={styles.bannerText}>Congratulations! Keep going...</Text>
+        <Text style={styles.bannerText}>Manage your ongoing requests here</Text>
       </View>
 
-      {/* Loading indicator */}
+      {/* Loader or List */}
       {loading ? (
         <ActivityIndicator size="large" color="#CED46A" />
       ) : (
@@ -100,12 +115,12 @@ export default function CompletedRequests() {
           data={data}
           keyExtractor={(item, index) => item._id || index.toString()}
           renderItem={renderItem}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{ paddingBottom: 80 }}
           ListEmptyComponent={
             <Text
               style={{ color: "#CED46A", fontSize: 18, textAlign: "center" }}
             >
-              No completed requests yet.
+              No active requests right now.
             </Text>
           }
         />
@@ -113,29 +128,35 @@ export default function CompletedRequests() {
 
       {/* Floating Refresh Button */}
       <TouchableOpacity style={styles.fab} onPress={getRequests}>
-        <Ionicons name="refresh" size={30} color="#075538" />
+        <Ionicons name="refresh" size={28} color="#075538" />
       </TouchableOpacity>
     </SafeAreaView>
   );
 }
 
+export default ActiveRequests;
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#075538", padding: 18 },
+  container: {
+    flex: 1,
+    backgroundColor: "#075538",
+    paddingTop: 35,
+    padding: 8,
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 18,
+    marginBottom: 20,
   },
   headerTitle: { fontSize: 24, fontWeight: "bold", color: "#CED46A" },
   banner: {
     backgroundColor: "#CED46A",
     padding: 12,
     borderRadius: 10,
-    marginBottom: 18,
+    marginBottom: 20,
     alignItems: "center",
   },
-  bannerText: { color: "#075538", fontWeight: "600", fontSize: 18 },
+  bannerText: { fontSize: 18, color: "#075538", fontWeight: "600" },
   card: {
     backgroundColor: "#0A6A44",
     borderRadius: 12,
@@ -150,24 +171,25 @@ const styles = StyleSheet.create({
   time: { fontSize: 16, color: "#CED46A", marginTop: 4 },
   btn: {
     backgroundColor: "#CED46A",
-    paddingVertical: 10,
+    paddingVertical: 9,
     paddingHorizontal: 20,
     borderRadius: 8,
   },
-  btnText: { color: "#075538", fontWeight: "bold", fontSize: 16 },
-
-  // Floating button styles
+  btnText: { fontSize: 18, color: "#075538", fontWeight: "bold" },
   fab: {
     position: "absolute",
-    bottom: 25,
-    right: 25,
+    bottom: 20,
+    right: 20,
     backgroundColor: "#CED46A",
-    padding: 18,
-    borderRadius: 50,
-    elevation: 5,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
+    elevation: 5,
   },
 });

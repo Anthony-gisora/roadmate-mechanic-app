@@ -1,5 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "expo-router";
 import React from "react";
+
 import {
   SafeAreaView,
   ScrollView,
@@ -10,6 +12,12 @@ import {
 } from "react-native";
 
 const Earnings = () => {
+  const navigation = useNavigation();
+
+  const handleBack = async () => {
+    navigation.navigate("index");
+  };
+
   const jobs = [
     { id: 1, type: "Flat Tire", amount: 500, time: "4 min ago" },
     { id: 2, type: "Engine Repair", amount: 1500, time: "13 min ago" },
@@ -17,14 +25,26 @@ const Earnings = () => {
     { id: 4, type: "Flat Tire", amount: 500, time: "45 min ago" },
   ];
 
+  // Dummy refresh handler (replace with API call later)
+  const handleRefresh = () => {
+    console.log("Refreshing earnings...");
+    // will fix an api to the payment services here
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         {/* Custom Header */}
         <View style={styles.header}>
-          <Ionicons name="arrow-back" size={34} color="#CED46A" />
+          <TouchableOpacity onPress={handleBack}>
+            <Ionicons name="arrow-back" size={30} color="#CED46A" />
+          </TouchableOpacity>
           <Text style={styles.headerTitle}>Earnings</Text>
-          <Ionicons name="notifications-outline" size={34} color="#CED46A" />
+          <TouchableOpacity
+            onPress={() => navigation.navigate("NotificationRequests" as never)}
+          >
+            <Ionicons name="notifications-outline" size={34} color="#CED46A" />
+          </TouchableOpacity>
         </View>
 
         {/* Total Balance */}
@@ -37,7 +57,10 @@ const Earnings = () => {
         </View>
 
         {/* Earnings List */}
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 100 }}
+        >
           {jobs.map((job) => (
             <View key={job.id} style={styles.jobCard}>
               <View>
@@ -51,6 +74,11 @@ const Earnings = () => {
             </View>
           ))}
         </ScrollView>
+
+        {/* Floating Refresh Button */}
+        <TouchableOpacity style={styles.fab} onPress={handleRefresh}>
+          <Ionicons name="refresh" size={30} color="#075538" />
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -145,5 +173,20 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#CED46A",
+  },
+
+  //  Floating button
+  fab: {
+    position: "absolute",
+    bottom: 25,
+    right: 25,
+    backgroundColor: "#CED46A",
+    padding: 18,
+    borderRadius: 50,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
   },
 });
