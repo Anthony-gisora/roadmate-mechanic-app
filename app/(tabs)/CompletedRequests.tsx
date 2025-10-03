@@ -1,5 +1,6 @@
 import { useMechanic } from "@/context/MechanicContext";
-import { handleDownload } from "@/utils/downloadOrg/download";
+import { CreateAndSharePdf } from "@/utils/downloadOrg/download";
+import { generateRecordTableHtml } from "@/utils/downloadOrg/generateDownloadFile";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { useNavigation } from "expo-router";
@@ -49,7 +50,7 @@ export default function CompletedRequests() {
   };
 
   const handleDownloads = () => {
-    handleDownload(data);
+    CreateAndSharePdf(generateRecordTableHtml(data));
   };
 
   useEffect(() => {
@@ -95,10 +96,17 @@ export default function CompletedRequests() {
       {/* Banner */}
       <View style={styles.banner}>
         <Text style={styles.bannerText}>Congratulations! Keep going...</Text>
-        <TouchableOpacity onPress={() => handleDownloads()}>
-          <Text>Download</Text>
-        </TouchableOpacity>
       </View>
+      {/* download the records  */}
+      <TouchableOpacity style={styles.downloadBtn} onPress={handleDownloads}>
+        <Ionicons
+          name="print-outline"
+          size={22}
+          color="#075538"
+          style={{ marginRight: 8 }}
+        />
+        <Text style={styles.downloadBtnText}>Download Records</Text>
+      </TouchableOpacity>
 
       {/* Loading indicator */}
       {loading ? (
@@ -179,5 +187,21 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
+  },
+  // download Button
+  downloadBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#CED46A",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignSelf: "center",
+    marginBottom: 18,
+  },
+  downloadBtnText: {
+    color: "#075538",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });

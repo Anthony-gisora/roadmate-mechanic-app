@@ -4,20 +4,13 @@ export const generateRecordTableHtml = (data) => {
       (item) =>
         `
             <tr>
-                <td style="padding: 8px; border: 1px solid #ddd;">${"usernameFrm"}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">${
-                  item.requestType
-                }</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">${
-                  item.details
-                }</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">${
-                  item.status
-                }</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">${item.servicedBy}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">${item.requestType}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">${item.details}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">${item.status}</td>
             </tr>`
     )
     .join();
-  console.log(tableRows);
 
   return `
         <html>
@@ -30,8 +23,9 @@ export const generateRecordTableHtml = (data) => {
           <thead>
             <tr style="background-color: #f2f2f2;">
               <th style="padding: 12px; border: 1px solid #ddd;">Name</th>
-              <th style="padding: 12px; border: 1px solid #ddd;">Email</th>
-              <th style="padding: 12px; border: 1px solid #ddd;">Role</th>
+              <th style="padding: 12px; border: 1px solid #ddd;">Request Type</th>
+              <th style="padding: 12px; border: 1px solid #ddd;">Details</th>
+              <th style="padding: 12px; border: 1px solid #ddd;">Status</th>
             </tr>
           </thead>
           <tbody>
