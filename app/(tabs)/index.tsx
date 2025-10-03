@@ -36,7 +36,7 @@ const MechanicDashboard = () => {
   const { signOut } = useAuth();
   const navigation = useNavigation();
 
-  const { mechanic } = useMechanic();
+  const { mechanic, setMechIsOnline, mechisOnline } = useMechanic();
   const router = useRouter();
 
   // Fetch requests from API
@@ -80,19 +80,29 @@ const MechanicDashboard = () => {
 
   const handleOfOnState = async () => {
     if (isOnline) {
-      axios.put(`http://localhost:5000/api/auth/is-online/${mechanic.id}`, {
-        online: "online",
-      });
+      axios.put(
+        `https://roadmateassist.onrender.com/api/auth/is-online/${mechanic.id}`,
+        {
+          online: "online",
+        }
+      );
+      setMechIsOnline(isOnline);
       console.log("you're online");
     } else {
-      axios.put(`http://localhost:5000/api/auth/is-online/${mechanic.id}`, {
-        online: "offline",
-      });
+      axios.put(
+        `https://roadmateassist.onrender.com/api/auth/is-online/${mechanic.id}`,
+        {
+          online: "offline",
+        }
+      );
+      setMechIsOnline(isOnline);
+
       console.log("You're offline");
     }
   };
 
   useEffect(() => {
+    setMechIsOnline(isOnline);
     getRequests();
   }, [user, mechanic, isOnline]);
 

@@ -18,7 +18,7 @@ export default function NotificationRequests() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
-  const { mechanic } = useMechanic();
+  const { mechanic, mechisOnline } = useMechanic();
 
   const handleBack = async () => {
     navigation.navigate("index");
@@ -102,7 +102,15 @@ export default function NotificationRequests() {
       {/* Navigate to RequestDescription with item._id + location */}
       <TouchableOpacity
         style={styles.btn}
-        onPress={() => handleReqDetails(item)}
+        onPress={() => {
+          mechisOnline
+            ? handleReqDetails(item)
+            : Alert.alert(
+                "Offline Alert!",
+                "You need to be Online to View requests"
+              );
+          console.log("you're offline");
+        }}
       >
         <Text style={styles.btnText}>View</Text>
       </TouchableOpacity>

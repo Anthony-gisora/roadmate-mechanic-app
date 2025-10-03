@@ -42,10 +42,11 @@ const MechanicLogin = () => {
       });
 
       const mechanic = res.data;
-      console.log(res);
 
       setLoading(false);
       setMechanic(mechanic.mechanic);
+
+      console.log(mechanic);
 
       // Navigate to tabs on successful login
       router.replace("/(tabs)");

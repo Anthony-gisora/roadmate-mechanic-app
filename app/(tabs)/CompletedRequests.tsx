@@ -1,4 +1,5 @@
 import { useMechanic } from "@/context/MechanicContext";
+import { handleDownload } from "@/utils/downloadOrg/download";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { useNavigation } from "expo-router";
@@ -47,6 +48,10 @@ export default function CompletedRequests() {
     }
   };
 
+  const handleDownloads = () => {
+    handleDownload(data);
+  };
+
   useEffect(() => {
     getRequests();
   }, []);
@@ -90,11 +95,16 @@ export default function CompletedRequests() {
       {/* Banner */}
       <View style={styles.banner}>
         <Text style={styles.bannerText}>Congratulations! Keep going...</Text>
+        <TouchableOpacity onPress={() => handleDownloads()}>
+          <Text>Download</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Loading indicator */}
       {loading ? (
-        <ActivityIndicator size="large" color="#CED46A" />
+        <View>
+          <ActivityIndicator size="large" color="#CED46A" />
+        </View>
       ) : (
         <FlatList
           data={data}

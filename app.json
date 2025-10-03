@@ -18,6 +18,7 @@
       "backgroundColor": "#075538"
     },
     "android": {
+      "permissions": ["WRITE_EXTERNAL_STORAGE"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#ffffff"
