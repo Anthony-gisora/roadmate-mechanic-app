@@ -5,6 +5,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   SafeAreaView,
   StyleSheet,
@@ -18,7 +19,7 @@ function ActiveRequests() {
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
 
-  const { mechanic } = useMechanic();
+  const { mechanic, mechisOnline } = useMechanic();
 
   const handleBack = () => {
     navigation.navigate("index" as never);
@@ -46,6 +47,27 @@ function ActiveRequests() {
     }
   };
 
+  // handle View
+  const HandleViewActive = (item) => {
+    if (!mechisOnline) {
+      Alert.alert("Offline Alert!", "You need to be Online to View requests");
+      console.log(mechisOnline);
+    } else {
+      navigation.navigate(
+        "RequestDescription" as never,
+        {
+          id: item._id,
+          driverId: item?.driverId,
+          requestType: item?.requestType,
+          details: item?.details,
+          curStatus: item.status,
+          latitude: item?.location[0] || 0,
+          longitude: item?.location[1] || 0,
+        } as never
+      );
+    }
+  };
+
   useEffect(() => {
     getRequests();
   }, []);
@@ -68,19 +90,7 @@ function ActiveRequests() {
       {/* Navigate to RequestDescription */}
       <TouchableOpacity
         style={styles.btn}
-        onPress={() =>
-          navigation.navigate(
-            "RequestDescription" as never,
-            {
-              id: item._id,
-              driverId: item?.driverId,
-              requestType: item?.requestType,
-              details: item?.details,
-              latitude: item?.location[0] || 0,
-              longitude: item?.location[1] || 0,
-            } as never
-          )
-        }
+        onPress={() => HandleViewActive(item)}
       >
         <Text style={styles.btnText}>View</Text>
       </TouchableOpacity>

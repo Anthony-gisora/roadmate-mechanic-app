@@ -109,7 +109,7 @@ export default function NotificationRequests() {
                 "Offline Alert!",
                 "You need to be Online to View requests"
               );
-          console.log("you're offline");
+          console.log(mechisOnline);
         }}
       >
         <Text style={styles.btnText}>View</Text>
