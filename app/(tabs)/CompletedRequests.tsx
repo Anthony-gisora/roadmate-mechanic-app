@@ -71,9 +71,9 @@ export default function CompletedRequests() {
         </Text>
       </View>
 
-      <TouchableOpacity style={styles.btn}>
+      {/* <TouchableOpacity style={styles.btn}>
         <Text style={styles.btnText}>View</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 

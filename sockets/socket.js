@@ -5,18 +5,32 @@ const urls = {
   prod: "https://roadmateassist.onrender.com",
 };
 
-const socket = io(urls.dev);
-
-export const initSocket = async () => {
+export const initSocket = async (mechanic) => {
+  const socket = io(urls.prod);
   socket.on("connect", () => {
+    socket.emit("registerMechanic", mechanic.personalNumber);
+    console.log(mechanic.personalNumber);
     console.log(`connection established `, socket.id);
   });
 };
 
-export const isOnlineEv = async (user) => {
-  socket.emit("online", { user });
+export const discon = async (mechanic) => {
+  const socket = io(urls.dev);
+  socket.disconnect();
 };
 
-export const isOfflineEv = async (user) => {
-  socket.emit("offline", { user });
+export const conn = async (mechanic) => {
+  const socket = io(urls.dev);
+  socket.emit("registerMechanic", mechanic.personalNumber);
+  socket.connect();
+};
+
+export const isOnlineEv = async (mechanic) => {
+  const socket = io(urls.dev);
+  socket.emit("online", { mechanic });
+};
+
+export const isOfflineEv = async (mechanic) => {
+  const socket = io(urls.dev);
+  socket.emit("offline", { mechanic });
 };

@@ -18,6 +18,7 @@ import {
 } from "react-native";
 import * as Animatable from "react-native-animatable";
 import Icon from "react-native-vector-icons/Ionicons";
+import { conn, discon } from "../../sockets/socket";
 
 const urls = {
   dev: "http://localhost:5000",
@@ -102,6 +103,8 @@ const MechanicDashboard = () => {
   };
 
   useEffect(() => {
+    !isOnline ? discon(mechanic) : conn(mechanic);
+    // initSocket();
     setMechIsOnline(isOnline);
     getRequests();
   }, [user, mechanic, isOnline]);
