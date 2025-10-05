@@ -1,6 +1,3 @@
-import { useMechanic } from "@/context/MechanicContext";
-import { useUser } from "@clerk/clerk-expo";
-import axios from "axios";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -17,39 +14,39 @@ import {
   View,
 } from "react-native";
 
-const URL_API = "https://roadmateassist.onrender.com/api/auth/login";
+const URL_API =
+  "https://roadmateassist.onrender.com/api/auth/verify-reset-code";
 
-const MechanicLogin = () => {
-  const [personalNumber, setPersonalNumber] = useState("");
-  const [password, setPassword] = useState("");
+const MechanicVerifyCode = () => {
+  const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  const { user } = useUser();
-  const { setMechanic } = useMechanic();
   const router = useRouter();
 
-  const handleLogin = async () => {
+  const handleVerifyCode = async () => {
     setLoading(true);
     setError("");
+    setMessage("");
 
     try {
-      const res = await axios.post(URL_API, {
-        personalNumber,
-        password,
-        mechCLkId: user?.id,
-      });
-
-      const mechanic = res.data;
+      const res = { data: { message: "reset success" } };
+      // const res = await axios.post(URL_API, { code });
       setLoading(false);
-      setMechanic(mechanic.mechanic);
-      console.log(mechanic);
+      setMessage(res.data.message || "Code verified successfully!");
 
-      router.replace("/(tabs)");
+      setTimeout(() => {
+        router.push({
+          pathname: "/(auth)/mechanic-reset-password",
+        });
+      }, 1500);
     } catch (err: any) {
-      console.error("Login error:", err.message);
-      setError("Check PersonalNumber, Password or email logged through");
       setLoading(false);
+      setError(
+        err.response?.data?.message ||
+          "Invalid or expired code. Please check and try again."
+      );
     }
   };
 
@@ -59,80 +56,53 @@ const MechanicLogin = () => {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.card}>
-            {/* Logo */}
             <Image
               source={require("../../assets/images/icon.png")}
               style={styles.logo}
               resizeMode="contain"
             />
 
-            <Text style={styles.title}>Mechanic Login</Text>
+            <Text style={styles.title}>Verify Reset Code</Text>
+            <Text style={styles.subtitle}>
+              Enter the verification code sent to your email to continue.
+            </Text>
 
-            {/* Personal Number */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Personal Number</Text>
+              <Text style={styles.label}>Verification Code</Text>
               <TextInput
-                value={personalNumber}
-                onChangeText={setPersonalNumber}
-                placeholder="e.g. MECH-00123"
+                value={code}
+                onChangeText={setCode}
+                placeholder="Enter the code you received"
                 placeholderTextColor="#888"
                 style={styles.input}
-                autoCapitalize="none"
-                returnKeyType="next"
+                keyboardType="number-pad"
               />
             </View>
 
-            {/* Password */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Password</Text>
-              <TextInput
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Enter your password"
-                placeholderTextColor="#888"
-                secureTextEntry
-                style={styles.input}
-                returnKeyType="done"
-              />
-            </View>
-
-            {/* Forgot Password */}
-            <TouchableOpacity
-              onPress={() => router.push("/(auth)/mechanic-forgot-password")}
-              style={styles.forgotPasswordContainer}
-            >
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </TouchableOpacity>
-
-            {/* Error Message */}
             {error ? <Text style={styles.error}>{error}</Text> : null}
+            {message ? <Text style={styles.success}>{message}</Text> : null}
 
-            {/* Login Button */}
             <TouchableOpacity
               style={[styles.button, loading && styles.buttonDisabled]}
-              onPress={handleLogin}
+              onPress={handleVerifyCode}
               disabled={loading}
             >
               {loading ? (
                 <ActivityIndicator color="#075538" />
               ) : (
-                <Text style={styles.buttonText}>Login</Text>
+                <Text style={styles.buttonText}>Verify Code</Text>
               )}
             </TouchableOpacity>
 
-            {/* Register */}
             <Text style={styles.footerText}>
-              Don’t have a personal number?{" "}
+              Didn’t get a code?{" "}
               <Text
                 style={styles.link}
-                onPress={() => router.push("/(auth)/mechanic-signup")}
+                onPress={() => router.push("/(auth)/mechanic-forgot-password")}
               >
-                Register as Mechanic
+                Resend
               </Text>
             </Text>
           </View>
@@ -169,21 +139,26 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   title: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: "bold",
-    textAlign: "center",
     color: "#075538",
-    marginBottom: 24,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 14,
+    textAlign: "center",
+    color: "#444",
+    marginBottom: 25,
   },
   inputGroup: {
-    marginBottom: 18,
     width: "100%",
+    marginBottom: 18,
   },
   label: {
     color: "#075538",
     fontWeight: "600",
     marginBottom: 6,
-    fontSize: 15,
   },
   input: {
     borderWidth: 1,
@@ -194,18 +169,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#000",
   },
-  forgotPasswordContainer: {
-    alignSelf: "flex-end",
-    marginBottom: 15,
-  },
-  forgotPasswordText: {
-    color: "#075538",
-    fontWeight: "600",
-    textDecorationLine: "underline",
-    fontSize: 14,
-  },
   error: {
     color: "red",
+    textAlign: "center",
+    marginBottom: 12,
+    fontSize: 14,
+  },
+  success: {
+    color: "green",
     textAlign: "center",
     marginBottom: 12,
     fontSize: 14,
@@ -215,7 +186,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: "center",
-    marginTop: 8,
     width: "100%",
   },
   buttonDisabled: {
@@ -239,4 +209,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MechanicLogin;
+export default MechanicVerifyCode;

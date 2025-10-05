@@ -1,5 +1,6 @@
 import { useMechanic } from "@/context/MechanicContext";
 import { useAuth, useUser } from "@clerk/clerk-expo";
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import { useRouter } from "expo-router";
@@ -164,6 +165,18 @@ const MechanicDashboard = () => {
           ? "You are available for driver requests ✅"
           : "Switch on to be available for driver requests"}
       </Text>
+
+      <View style={styles.actionRow}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("discovery" as never)}
+          style={styles.actionRowItem}
+        >
+          <TouchableOpacity style={styles.discoveryBtn}>
+            <Ionicons name="compass-outline" size={38} color="#075538" />
+          </TouchableOpacity>
+          <Text style={styles.discoveryBtnText}>Explore</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Dashboard only visible when Online */}
       {isOnline && (
@@ -429,6 +442,31 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#075538",
+  },
+  actionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 18,
+  },
+
+  actionRowItem: {
+    backgroundColor: "#CED46A",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-evenly",
+    paddingHorizontal: 8,
+    borderRadius: 10,
+  },
+
+  discoveryBtnText: {
+    fontSize: 18,
+    color: "#075538",
+    fontWeight: "bold",
+  },
+
+  discoveryBtn: {
+    width: "auto",
   },
 });
 

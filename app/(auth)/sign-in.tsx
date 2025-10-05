@@ -1,6 +1,6 @@
 import { SignedIn, SignedOut, useSignIn, useUser } from "@clerk/clerk-expo";
 import { Link, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Image,
   StyleSheet,
@@ -19,7 +19,6 @@ export default function SignInScreen() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  //  Redirect if already signed in
   useEffect(() => {
     if (isSignedIn) {
       router.replace("/(auth)/mechanic-login");
@@ -28,7 +27,7 @@ export default function SignInScreen() {
 
   const onSignInPress = async () => {
     if (!isLoaded) return;
-    setError(""); // reset error before trying again
+    setError("");
 
     try {
       const signInAttempt = await signIn.create({

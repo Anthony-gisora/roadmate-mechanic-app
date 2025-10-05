@@ -1,7 +1,5 @@
-import { useMechanic } from "@/context/MechanicContext";
-import { useUser } from "@clerk/clerk-expo";
 import axios from "axios";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -17,39 +15,51 @@ import {
   View,
 } from "react-native";
 
-const URL_API = "https://roadmateassist.onrender.com/api/auth/login";
+const URL_API = "https://roadmateassist.onrender.com/api/auth/reset-password";
 
-const MechanicLogin = () => {
-  const [personalNumber, setPersonalNumber] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const { user } = useUser();
-  const { setMechanic } = useMechanic();
+const MechanicResetPassword = () => {
+  const { email } = useLocalSearchParams(); // comes from the verify code screen
   const router = useRouter();
 
-  const handleLogin = async () => {
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+
+  const handleResetPassword = async () => {
+    if (!newPassword || !confirmPassword) {
+      setError("Please fill in all fields");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
     setLoading(true);
     setError("");
+    setMessage("");
 
     try {
       const res = await axios.post(URL_API, {
-        personalNumber,
-        password,
-        mechCLkId: user?.id,
+        email,
+        newPassword,
       });
 
-      const mechanic = res.data;
       setLoading(false);
-      setMechanic(mechanic.mechanic);
-      console.log(mechanic);
+      setMessage(res.data.message || "Password reset successfully!");
 
-      router.replace("/(tabs)");
+      // Redirect to login after a short delay
+      setTimeout(() => {
+        router.replace("/(auth)/mechanic-login");
+      }, 1500);
     } catch (err: any) {
-      console.error("Login error:", err.message);
-      setError("Check PersonalNumber, Password or email logged through");
       setLoading(false);
+      setError(
+        err.response?.data?.message ||
+          "Failed to reset password. Please try again."
+      );
     }
   };
 
@@ -59,10 +69,7 @@ const MechanicLogin = () => {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.card}>
             {/* Logo */}
             <Image
@@ -71,68 +78,62 @@ const MechanicLogin = () => {
               resizeMode="contain"
             />
 
-            <Text style={styles.title}>Mechanic Login</Text>
+            <Text style={styles.title}>Reset Password</Text>
+            <Text style={styles.subtitle}>
+              Enter your new password below to complete the reset process.
+            </Text>
 
-            {/* Personal Number */}
+            {/* New Password */}
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Personal Number</Text>
+              <Text style={styles.label}>New Password</Text>
               <TextInput
-                value={personalNumber}
-                onChangeText={setPersonalNumber}
-                placeholder="e.g. MECH-00123"
+                value={newPassword}
+                onChangeText={setNewPassword}
+                placeholder="Enter new password"
                 placeholderTextColor="#888"
                 style={styles.input}
-                autoCapitalize="none"
-                returnKeyType="next"
-              />
-            </View>
-
-            {/* Password */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Password</Text>
-              <TextInput
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Enter your password"
-                placeholderTextColor="#888"
                 secureTextEntry
-                style={styles.input}
-                returnKeyType="done"
               />
             </View>
 
-            {/* Forgot Password */}
-            <TouchableOpacity
-              onPress={() => router.push("/(auth)/mechanic-forgot-password")}
-              style={styles.forgotPasswordContainer}
-            >
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </TouchableOpacity>
+            {/* Confirm Password */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Confirm Password</Text>
+              <TextInput
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                placeholder="Re-enter new password"
+                placeholderTextColor="#888"
+                style={styles.input}
+                secureTextEntry
+              />
+            </View>
 
-            {/* Error Message */}
+            {/* Error or Success Message */}
             {error ? <Text style={styles.error}>{error}</Text> : null}
+            {message ? <Text style={styles.success}>{message}</Text> : null}
 
-            {/* Login Button */}
+            {/* Submit Button */}
             <TouchableOpacity
               style={[styles.button, loading && styles.buttonDisabled]}
-              onPress={handleLogin}
+              onPress={handleResetPassword}
               disabled={loading}
             >
               {loading ? (
                 <ActivityIndicator color="#075538" />
               ) : (
-                <Text style={styles.buttonText}>Login</Text>
+                <Text style={styles.buttonText}>Reset Password</Text>
               )}
             </TouchableOpacity>
 
-            {/* Register */}
+            {/* Back to Login */}
             <Text style={styles.footerText}>
-              Don’t have a personal number?{" "}
+              Go back to{" "}
               <Text
                 style={styles.link}
-                onPress={() => router.push("/(auth)/mechanic-signup")}
+                onPress={() => router.replace("/(auth)/mechanic-login")}
               >
-                Register as Mechanic
+                Login
               </Text>
             </Text>
           </View>
@@ -169,21 +170,26 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   title: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: "bold",
-    textAlign: "center",
     color: "#075538",
-    marginBottom: 24,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 14,
+    textAlign: "center",
+    color: "#444",
+    marginBottom: 25,
   },
   inputGroup: {
-    marginBottom: 18,
     width: "100%",
+    marginBottom: 18,
   },
   label: {
     color: "#075538",
     fontWeight: "600",
     marginBottom: 6,
-    fontSize: 15,
   },
   input: {
     borderWidth: 1,
@@ -194,18 +200,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#000",
   },
-  forgotPasswordContainer: {
-    alignSelf: "flex-end",
-    marginBottom: 15,
-  },
-  forgotPasswordText: {
-    color: "#075538",
-    fontWeight: "600",
-    textDecorationLine: "underline",
-    fontSize: 14,
-  },
   error: {
     color: "red",
+    textAlign: "center",
+    marginBottom: 12,
+    fontSize: 14,
+  },
+  success: {
+    color: "green",
     textAlign: "center",
     marginBottom: 12,
     fontSize: 14,
@@ -215,7 +217,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: "center",
-    marginTop: 8,
     width: "100%",
   },
   buttonDisabled: {
@@ -239,4 +240,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MechanicLogin;
+export default MechanicResetPassword;

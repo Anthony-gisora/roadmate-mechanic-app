@@ -1,7 +1,7 @@
 // SignUpScreen.tsx
 import { useSignUp } from "@clerk/clerk-expo";
 import { useRouter } from "expo-router";
-import * as React from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -18,18 +18,18 @@ export default function SignUpScreen() {
   const router = useRouter();
 
   // form fields (include all fields Clerk may require)
-  const [firstName, setFirstName] = React.useState("");
-  const [lastName, setLastName] = React.useState("");
-  const [username, setUsername] = React.useState("");
-  const [emailAddress, setEmailAddress] = React.useState("");
-  const [password, setPassword] = React.useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [username, setUsername] = useState("");
+  const [emailAddress, setEmailAddress] = useState("");
+  const [password, setPassword] = useState("");
 
   // verification state
-  const [pendingVerification, setPendingVerification] = React.useState(false);
-  const [code, setCode] = React.useState("");
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [code, setCode] = useState("");
 
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   // Helper to surface Clerk missing fields
   const showWhichFields = (s: any) => {
