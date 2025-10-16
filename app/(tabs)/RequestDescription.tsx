@@ -5,17 +5,26 @@ import axios from "axios";
 import * as Location from "expo-location";
 import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Image,
+  Modal,
   SafeAreaView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+
 import { WebView } from "react-native-webview";
 
 const RequestDescription = () => {
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [amount, setAmount] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const route = useRoute();
   const navigation = useNavigation() as any;
 
@@ -140,10 +149,12 @@ const RequestDescription = () => {
   // Complete request → update status
   const handleComplete = async () => {
     try {
+      await handleSendPayment();
       await axios.put(
         `https://roadmateassist.onrender.com/api/req/update-complete/${id}`,
         { status: "completed", servicedBy: mechanic.personalNumber }
       );
+      setShowPaymentModal(true);
       setStatus("completed");
       console.log(id);
 
@@ -154,6 +165,52 @@ const RequestDescription = () => {
     } catch (error: any) {
       console.error("Error completing request:", error.message);
       Alert.alert("Error", "Failed to complete request. Try again.");
+    }
+  };
+
+  const handleSendPayment = async () => {
+    if (!phoneNumber || !amount) {
+      Alert.alert("Error", "Please enter phone number and amount");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const stkResponse = await axios.post(
+        "https://roadmateassist.onrender.com/stk/stkpush",
+        {
+          phone: phoneNumber,
+          amount: Number(amount),
+          requestId: id,
+        }
+      );
+
+      if (stkResponse.data && stkResponse.data.ResponseDescription) {
+        Alert.alert("STK Push Sent", "Please complete payment on your phone.");
+
+        // Once STK push initiated, mark as completed
+        await axios.put(
+          `https://roadmateassist.onrender.com/api/req/update-complete/${id}`,
+          { status: "completed", servicedBy: mechanic.personalNumber }
+        );
+
+        setStatus("completed");
+        setShowPaymentModal(false);
+        setPhoneNumber("");
+        setAmount("");
+
+        // Redirect after a short delay
+        setTimeout(() => {
+          navigation.navigate("NotificationRequests" as never);
+        }, 3000);
+      } else {
+        Alert.alert("Error", "Failed to send STK push. Try again.");
+      }
+    } catch (error: any) {
+      console.error("Payment error:", error.message);
+      Alert.alert("Error", "Payment request failed. Try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -233,8 +290,19 @@ const RequestDescription = () => {
               Request: Lat {latitude}, Lng {longitude}
             </Text>
           </View>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("ChatScreen" as never)}
+            style={styles.chatBtnView}
+          >
+            <Ionicons
+              name="chatbubble-ellipses-outline"
+              size={38}
+              color="#CED46A"
+            />
+            <Text style={styles.chatBtnText}>Open Chat</Text>
+          </TouchableOpacity>
 
-          {myCoords && (
+          {/* {myCoords && (
             <View style={styles.detailRow}>
               <Ionicons
                 name="person-outline"
@@ -247,7 +315,7 @@ const RequestDescription = () => {
                 {myCoords.longitude.toFixed(5)}
               </Text>
             </View>
-          )}
+          )} */}
 
           {payment && (
             <View style={styles.detailRow}>
@@ -296,6 +364,51 @@ const RequestDescription = () => {
             )}
           </View>
         </View>
+        {/* Payment Modal */}
+        <Modal visible={showPaymentModal} transparent animationType="slide">
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Complete Request - Payment</Text>
+
+              <TextInput
+                style={styles.input}
+                placeholder="Enter driver phone number (2547...)"
+                placeholderTextColor="#888"
+                keyboardType="phone-pad"
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="Enter amount"
+                placeholderTextColor="#888"
+                keyboardType="numeric"
+                value={amount}
+                onChangeText={setAmount}
+              />
+
+              {loading ? (
+                <ActivityIndicator color="#075538" size="large" />
+              ) : (
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={styles.cancelBtn}
+                    onPress={() => setShowPaymentModal(false)}
+                  >
+                    <Text style={styles.cancelText}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.confirmBtn}
+                    onPress={handleSendPayment}
+                  >
+                    <Text style={styles.confirmText}>Send STK</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </View>
+        </Modal>
       </View>
     </SafeAreaView>
   );
@@ -395,4 +508,73 @@ const styles = StyleSheet.create({
     backgroundColor: "#075538",
   },
   congratsText: { fontSize: 18, fontWeight: "bold", color: "#CED46A" },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "#CED46A",
+    width: "85%",
+    borderRadius: 20,
+    padding: 20,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#075538",
+    marginBottom: 15,
+  },
+  input: {
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#075538",
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 12,
+    color: "#075538",
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  cancelBtn: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 12,
+    marginRight: 8,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#075538",
+  },
+  confirmBtn: {
+    flex: 1,
+    backgroundColor: "#075538",
+    borderRadius: 10,
+    padding: 12,
+    alignItems: "center",
+  },
+  cancelText: { color: "#075538", fontWeight: "bold" },
+  confirmText: { color: "#CED46A", fontWeight: "bold" },
+
+  chatBtnView: {
+    alignSelf: "center",
+    padding: 2,
+    width: "50%",
+    backgroundColor: "#075538",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    paddingHorizontal: 8,
+    borderRadius: 10,
+  },
+  chatBtnText: {
+    fontSize: 18,
+    color: "#CED46A",
+    fontWeight: "bold",
+  },
 });

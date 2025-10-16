@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -14,10 +15,15 @@ import {
   View,
 } from "react-native";
 
-const URL_API =
-  "https://roadmateassist.onrender.com/api/auth/verify-reset-code";
+export const apiUrl = {
+  dev: "http://localhost:5000/api/auth/verify-reset-code",
+  prod: "https://roadmateassist.onrender.com/api/auth/verify-reset-code",
+};
+
+const URL_API = apiUrl.prod;
 
 const MechanicVerifyCode = () => {
+  const [personalNumber, setPersonalNumber] = useState("");
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -26,19 +32,25 @@ const MechanicVerifyCode = () => {
   const router = useRouter();
 
   const handleVerifyCode = async () => {
+    if (!personalNumber.trim() || !code.trim()) {
+      setError("Please fill in both fields");
+      return;
+    }
+
     setLoading(true);
     setError("");
     setMessage("");
 
     try {
-      const res = { data: { message: "reset success" } };
-      // const res = await axios.post(URL_API, { code });
+      const res = await axios.post(URL_API, { personalNumber, code });
       setLoading(false);
       setMessage(res.data.message || "Code verified successfully!");
 
+      // Navigate to reset password screen
       setTimeout(() => {
         router.push({
           pathname: "/(auth)/mechanic-reset-password",
+          params: { personalNumber },
         });
       }, 1500);
     } catch (err: any) {
@@ -47,6 +59,7 @@ const MechanicVerifyCode = () => {
         err.response?.data?.message ||
           "Invalid or expired code. Please check and try again."
       );
+      console.log(err);
     }
   };
 
@@ -58,6 +71,7 @@ const MechanicVerifyCode = () => {
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.card}>
+            {/* Logo */}
             <Image
               source={require("../../assets/images/icon.png")}
               style={styles.logo}
@@ -66,9 +80,24 @@ const MechanicVerifyCode = () => {
 
             <Text style={styles.title}>Verify Reset Code</Text>
             <Text style={styles.subtitle}>
-              Enter the verification code sent to your email to continue.
+              Enter Your verified mechanic PersonalNumber to continue.
             </Text>
 
+            {/* personalNumber */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Registered Personal Number</Text>
+              <TextInput
+                value={personalNumber}
+                onChangeText={setPersonalNumber}
+                placeholder="e.g. Mech-XXX"
+                placeholderTextColor="#888"
+                style={styles.input}
+                keyboardType="personalNumber-address"
+                autoCapitalize="none"
+              />
+            </View>
+
+            {/* Code */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Verification Code</Text>
               <TextInput
@@ -81,9 +110,11 @@ const MechanicVerifyCode = () => {
               />
             </View>
 
+            {/* Feedback */}
             {error ? <Text style={styles.error}>{error}</Text> : null}
             {message ? <Text style={styles.success}>{message}</Text> : null}
 
+            {/* Verify Button */}
             <TouchableOpacity
               style={[styles.button, loading && styles.buttonDisabled]}
               onPress={handleVerifyCode}
@@ -96,6 +127,7 @@ const MechanicVerifyCode = () => {
               )}
             </TouchableOpacity>
 
+            {/* Back to Forgot Password */}
             <Text style={styles.footerText}>
               Didn’t get a code?{" "}
               <Text

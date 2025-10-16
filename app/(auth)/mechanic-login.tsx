@@ -42,6 +42,7 @@ const MechanicLogin = () => {
 
       const mechanic = res.data;
       setLoading(false);
+
       setMechanic(mechanic.mechanic);
       console.log(mechanic);
 

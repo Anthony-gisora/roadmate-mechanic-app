@@ -15,22 +15,22 @@ export const initSocket = async (mechanic) => {
 };
 
 export const discon = async (mechanic) => {
-  const socket = io(urls.dev);
+  const socket = io(urls.prod);
   socket.disconnect();
 };
 
 export const conn = async (mechanic) => {
-  const socket = io(urls.dev);
+  const socket = io(urls.prod);
   socket.emit("registerMechanic", mechanic.personalNumber);
   socket.connect();
 };
 
 export const isOnlineEv = async (mechanic) => {
-  const socket = io(urls.dev);
+  const socket = io(urls.prod);
   socket.emit("online", { mechanic });
 };
 
 export const isOfflineEv = async (mechanic) => {
-  const socket = io(urls.dev);
+  const socket = io(urls.prod);
   socket.emit("offline", { mechanic });
 };

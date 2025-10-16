@@ -16,11 +16,11 @@ import {
 } from "react-native";
 
 export const apiUrl = {
-  dev: "http://localhost:5000",
+  dev: "http://localhost:5000/api/auth/forgot-password",
   prod: "https://roadmateassist.onrender.com/api/auth/forgot-password",
 };
 
-const URL_API = `http://localhost:5000/api/auth/forgot-password`;
+const URL_API = apiUrl.prod;
 
 const MechanicForgotPassword = () => {
   const [identifier, setIdentifier] = useState("");
@@ -32,7 +32,7 @@ const MechanicForgotPassword = () => {
   const navigation = useNavigation();
 
   const handlePasswordReset = async () => {
-    if (!identifier) {
+    if (!identifier.trim()) {
       setError("Please enter your email or personal number");
       return;
     }
@@ -74,7 +74,7 @@ const MechanicForgotPassword = () => {
 
             <Text style={styles.title}>Forgot Password</Text>
             <Text style={styles.subtitle}>
-              Enter your registered email to receive a reset link.
+              Enter your registered Mechanic Personal number.
             </Text>
 
             <View style={styles.inputGroup}>
@@ -82,7 +82,7 @@ const MechanicForgotPassword = () => {
               <TextInput
                 value={identifier}
                 onChangeText={setIdentifier}
-                placeholder="e.g. Tonny@gmail.com "
+                placeholder="e.g. Mech-XXX"
                 placeholderTextColor="#888"
                 style={styles.input}
                 autoCapitalize="none"

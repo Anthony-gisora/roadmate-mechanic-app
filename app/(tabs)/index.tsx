@@ -122,11 +122,15 @@ const MechanicDashboard = () => {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        {user?.imageUrl ? (
-          <Image source={{ uri: user.imageUrl }} style={styles.avatar} />
-        ) : (
-          <View style={styles.avatar} />
-        )}
+        <TouchableOpacity
+          onPress={() => navigation.navigate("MechanicProfileScreen" as never)}
+        >
+          {user?.imageUrl ? (
+            <Image source={{ uri: user.imageUrl }} style={styles.avatar} />
+          ) : (
+            <View style={styles.avatar} />
+          )}
+        </TouchableOpacity>
 
         <View style={styles.welcome}>
           <Text style={styles.welcomeText}>Welcome,</Text>
@@ -171,10 +175,29 @@ const MechanicDashboard = () => {
           onPress={() => navigation.navigate("discovery" as never)}
           style={styles.actionRowItem}
         >
-          <TouchableOpacity style={styles.discoveryBtn}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("discovery" as never)}
+            style={styles.discoveryBtn}
+          >
             <Ionicons name="compass-outline" size={38} color="#075538" />
           </TouchableOpacity>
           <Text style={styles.discoveryBtnText}>Explore</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("ChatScreen" as never)}
+          style={styles.actionRowItem}
+        >
+          <TouchableOpacity
+            onPress={() => navigation.navigate("ChatScreen" as never)}
+            style={styles.discoveryBtn}
+          >
+            <Ionicons
+              name="chatbubble-ellipses-outline"
+              size={38}
+              color="#075538"
+            />
+          </TouchableOpacity>
+          <Text style={styles.discoveryBtnText}>Chat</Text>
         </TouchableOpacity>
       </View>
 

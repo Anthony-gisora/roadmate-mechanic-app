@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
+
 import {
   ActivityIndicator,
   Image,
@@ -15,10 +16,15 @@ import {
   View,
 } from "react-native";
 
-const URL_API = "https://roadmateassist.onrender.com/api/auth/reset-password";
+export const apiUrl = {
+  dev: "http://localhost:5000/api/auth/reset-password",
+  prod: "https://roadmateassist.onrender.com/api/auth/reset-password",
+};
+
+const URL_API = apiUrl.prod;
 
 const MechanicResetPassword = () => {
-  const { email } = useLocalSearchParams(); // comes from the verify code screen
+  const { personalNumber } = useLocalSearchParams(); // comes from the verify code screen
   const router = useRouter();
 
   const [newPassword, setNewPassword] = useState("");
@@ -42,8 +48,9 @@ const MechanicResetPassword = () => {
     setMessage("");
 
     try {
+      console.log(personalNumber);
       const res = await axios.post(URL_API, {
-        email,
+        personalNumber,
         newPassword,
       });
 
@@ -60,6 +67,7 @@ const MechanicResetPassword = () => {
         err.response?.data?.message ||
           "Failed to reset password. Please try again."
       );
+      console.log(err);
     }
   };
 
